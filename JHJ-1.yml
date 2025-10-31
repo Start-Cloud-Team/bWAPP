@@ -1,0 +1,30 @@
+version: 1.0
+
+env:
+  variables:
+    IMAGE_REPO_NAME: bwapp   #ECR 저장소 이름
+    IMAGE_TAG: latest        #ECR 저장소 이미지 태그
+  secrets-manager:
+    AWS_REGION: "ap-northeast-2"  #AWS 리전 (서울로 설정)
+
+phases:
+  pre_build:
+    commands:
+      - echo Pre-build phase started.  #문자열 단순 출력
+      #AWS CLI에 요청하여 ECR 로그인에 사용할 임시 비밀번호를 출력 | 앞의 임시 비밀번호를 docker login을 통해 연동
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      
+  build:
+    commands:
+      - echo Build phase started.
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .  #Dockerfile을 이용하여 소스 코드를 이미지로 빌드
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG  #ECR 저장소 주소에 맞게 이미지 태그 설정
+      
+  post_build:
+    commands:
+      - echo 📦 Post-build phase started.
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG  #빌드된 Docker 이미지를 ECR에 푸시
+      
+artifacts:
+  files:
+    - '**/*'
