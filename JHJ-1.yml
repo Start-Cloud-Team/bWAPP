@@ -20,12 +20,12 @@ phases:
     commands:
       - echo Build phase started.
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .  #Dockerfile을 이용하여 소스 코드를 이미지로 빌드
-      - docker tag $IMAGE_REPO_NAME: $IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG  #ECR 저장소 주소에 맞게 이미지 태그 설정
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG  #ECR 저장소 주소에 맞게 이미지 태그 설정
       
   post_build:
     commands:
       - echo 📦 Post-build phase started.
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME: $IMAGE_TAG  #빌드된 Docker 이미지를 ECR에 푸시
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG  #빌드된 Docker 이미지를 ECR에 푸시
       
 artifacts:
   files:
