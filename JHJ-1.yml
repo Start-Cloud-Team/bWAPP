@@ -12,9 +12,8 @@ phases:
     commands:
       - echo Pre-build phase started.  #문자열 단순 출력
       #AWS CLI에 요청하여 ECR 로그인에 사용할 임시 비밀번호를 출력 | 앞의 임시 비밀번호를 docker login을 통해 연동
-      - ECR_PASSWORD=$(aws ecr get-login-password --region $AWS_REGION)
-      - echo $ECR_PASSWORD
-      - echo "$ECR_PASSWORD" | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - echo $AWS_REGION
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
       
   build:
     commands:
