@@ -1,48 +1,53 @@
-version: 0.2  # 최신 CodeBuild 스펙 사용
+version: 0.2  # 최신 CodeBuild 스펙
 
 env:
-  parameter-store:
-    AWS_REGION: "/bwapp/aws_region"
   variables:
-    APP_NAME: "bWAPP"
-    IMAGE_NAME: "bWAPP-app"
-    TAG: "v1.0.${CODEBUILD_BUILD_NUMBER}"   # 빌드번호를 포함한 동적 태그
+    IMAGE_NAME: "bwapp"                       # ECR에 저장될 이미지 이름
+    IMAGE_TAG: "latest"                       # 또는 "v${CODEBUILD_BUILD_NUMBER}"
+    AWS_REGION: "ap-northeast-2"              # 서울 리전 (CodeBuild 지역과 일치해야 함)
 
 phases:
   install:
     runtime-versions:
       docker: 20
     commands:
-      - echo "==== Install Phase ===="
-      - echo "Region: $AWS_REGION"
-      - echo "Build Number: $CODEBUILD_BUILD_NUMBER"
-      - aws --version
+      - echo "==== INSTALL PHASE START ===="
+      - echo "AWS Region: $AWS_REGION"
+      - echo "Docker version check:"
       - docker --version
+      - echo "AWS CLI version check:"
+      - aws --version
+      - echo "==== INSTALL PHASE END ===="
+
+  pre_build:
+    commands:
+      - echo "==== PRE-BUILD PHASE START ===="
+      - echo "Retrieving AWS Account ID..."
+      - export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - echo "Account ID: $ACCOUNT_ID"
+      - echo "Logging into Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - echo "==== PRE-BUILD PHASE END ===="
 
   build:
     commands:
-      - echo "==== Build Phase ===="
-      - echo "Building Docker image..."
-      - docker build -t $IMAGE_NAME:$TAG .
-      - docker tag $IMAGE_NAME:$TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$TAG
+      - echo "==== BUILD PHASE START ===="
+      - echo "Building Docker image: $IMAGE_NAME:$IMAGE_TAG"
+      - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$IMAGE_TAG
+      - echo "==== BUILD PHASE END ===="
 
   post_build:
     commands:
-      - echo "==== Post-Build Phase ===="
-      - echo "Logging in to ECR..."
-      - aws ecr get-login-password --region $AWS_REGION | \
-        docker login --username AWS --password-stdin \
-        $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-      - echo "Pushing Docker image to ECR..."
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$TAG
-      - echo "Image successfully pushed!"
-      - echo "IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$TAG" > imageDetail.txt
+      - echo "==== POST-BUILD PHASE START ===="
+      - echo "Pushing image to ECR..."
+      - docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$IMAGE_TAG
+      - echo "Image push completed."
+      - echo "IMAGE_URI=$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$IMAGE_TAG" > imageDetail.txt
+      - cat imageDetail.txt
+      - echo "==== POST-BUILD PHASE END ===="
 
 artifacts:
   files:
     - imageDetail.txt
   discard-paths: yes
-
-cache:
-  paths:
-    - '/root/.docker/**/*'
