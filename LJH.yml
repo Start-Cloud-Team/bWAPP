@@ -1,25 +1,48 @@
-name: PHP Build Test
+version: 0.2  # 최신 CodeBuild 스펙 사용
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+env:
+  parameter-store:
+    AWS_REGION: "/bwapp/aws_region"
+  variables:
+    APP_NAME: "bWAPP"
+    IMAGE_NAME: "bWAPP-app"
+    TAG: "v1.0.${CODEBUILD_BUILD_NUMBER}"   # 빌드번호를 포함한 동적 태그
 
-jobs:
+phases:
+  install:
+    runtime-versions:
+      docker: 20
+    commands:
+      - echo "==== Install Phase ===="
+      - echo "Region: $AWS_REGION"
+      - echo "Build Number: $CODEBUILD_BUILD_NUMBER"
+      - aws --version
+      - docker --version
+
   build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    commands:
+      - echo "==== Build Phase ===="
+      - echo "Building Docker image..."
+      - docker build -t $IMAGE_NAME:$TAG .
+      - docker tag $IMAGE_NAME:$TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$TAG
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
+  post_build:
+    commands:
+      - echo "==== Post-Build Phase ===="
+      - echo "Logging in to ECR..."
+      - aws ecr get-login-password --region $AWS_REGION | \
+        docker login --username AWS --password-stdin \
+        $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - echo "Pushing Docker image to ECR..."
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$TAG
+      - echo "Image successfully pushed!"
+      - echo "IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$TAG" > imageDetail.txt
 
-      - name: Install dependencies
-        run: composer install
+artifacts:
+  files:
+    - imageDetail.txt
+  discard-paths: yes
 
-      - name: Run tests
-        run: phpunit
+cache:
+  paths:
+    - '/root/.docker/**/*'
