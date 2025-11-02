@@ -1,4 +1,4 @@
-version: 0.2  # 최신 CodeBuild 스펙
+version: 0.2
 
 env:
   variables:
