@@ -2,7 +2,7 @@ version: 0.1
 
 env:
   variables:
-    IMAGE_REPO_NAME: bwapp  
+    IMAGE_REPO_NAME: JHJ-2
     IMAGE_TAG: latest 
   secrets-manager:
     AWS_REGION: "ap-northeast-2"
