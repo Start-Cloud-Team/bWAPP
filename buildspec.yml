@@ -41,13 +41,19 @@ phases:
         }
         EOF
       - |
+        TASK_DEF_ARN=$(aws ecs register-task-definition \
+          --cli-input-json file://taskdef.json \
+          --query 'taskDefinition.taskDefinitionArn' \
+          --output text)
+        echo "New task definition ARN: $TASK_DEF_ARN"
+      - |
         cat > appspec.yml <<EOF
         version: 0.0
         Resources:
           - TargetService:
               Type: AWS::ECS::Service
               Properties:
-                TaskDefinition: "SCT-Bwapp-task-defition"
+                TaskDefinition: "$TASK_DEF_ARN"
                 LoadBalancerInfo:
                   ContainerName: "Bwapp-container"
                   ContainerPort: 7890
