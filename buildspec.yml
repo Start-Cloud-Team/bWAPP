@@ -40,9 +40,22 @@ phases:
           "family": "SCT-Bwapp-task-defition"
         }
         EOF
+      - |
+        cat > appspec.yml <<EOF
+        version: 0.0
+        Resources:
+          - TargetService:
+              Type: AWS::ECS::Service
+              Properties:
+                TaskDefinition: "taskdef.json"
+                LoadBalancerInfo:
+                  ContainerName: "Bwapp-container"
+                  ContainerPort: 7890
+        EOF
       - echo '[{"name":"Bwapp-container","imageUri":"329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/ljh_1:latest"}]' > imagedefinitions.json
 
 artifacts:
   files:
     - imagedefinitions.json
     - taskdef.json
+    - appspec.yml
