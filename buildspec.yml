@@ -15,8 +15,34 @@ phases:
       - echo "Pushing Docker image to ECR..."
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - echo "Build completed successfully."
+      - |
+        cat > taskdef.json <<EOF
+        {
+          "executionRoleArn": "arn:aws:iam::329984431650:role/ecsTaskExecutionRole",
+          "containerDefinitions": [
+            {
+              "name": "Bwapp-container",
+              "image": "329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/ljh_1:latest",
+              "essential": true,
+              "portMappings": [
+                {
+                  "protocol": "tcp",
+                  "hostPort": 7890,
+                  "containerPort": 7890
+                }
+              ]
+            }
+          ],
+          "requiresCompatibilities": ["FARGATE"],
+          "networkMode": "awsvpc",
+          "cpu": "256",
+          "memory": "2048",
+          "family": "SCT-Bwapp-task-defition"
+        }
+        EOF
       - echo '[{"name":"Bwapp-container","imageUri":"329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/ljh_1:latest"}]' > imagedefinitions.json
 
 artifacts:
   files:
     - imagedefinitions.json
+    - taskdef.json
