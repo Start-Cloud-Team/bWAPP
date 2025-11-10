@@ -47,7 +47,7 @@ phases:
           - TargetService:
               Type: AWS::ECS::Service
               Properties:
-                TaskDefinition: "taskdef.json"
+                TaskDefinition: "SCT-Bwapp-task-defition"
                 LoadBalancerInfo:
                   ContainerName: "Bwapp-container"
                   ContainerPort: 7890
