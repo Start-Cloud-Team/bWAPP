@@ -1,5 +1,9 @@
 version: 0.2
 
+env:
+  variables:
+    CONTAINER_NAME: Bwapp-container
+
 phases:
   pre_build:
     commands:
@@ -16,7 +20,15 @@ phases:
     commands:
       - echo "Pushing Docker image to ECR..."
       - docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
-      - echo "Registering new task definition..."
+
+      - echo "Retrieving image digest..."
+      - IMAGE_DIGEST=$(aws ecr describe-images \
+          --repository-name ${IMAGE_REPO_NAME} \
+          --image-ids imageTag=${IMAGE_TAG} \
+          --query 'imageDetails[0].imageDigest' --output text)
+      - echo "Image digest: $IMAGE_DIGEST"
+
+      - echo "Creating task definition..."
       - |
         cat > taskdef.json <<EOF
         {
@@ -24,7 +36,7 @@ phases:
           "containerDefinitions": [
             {
               "name": "${CONTAINER_NAME}",
-              "image": "${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}",
+              "image": "${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}@${IMAGE_DIGEST}",
               "essential": true,
               "portMappings": [
                 {
@@ -42,12 +54,16 @@ phases:
           "family": "SCT-Bwapp-task-defition"
         }
         EOF
+
+      - echo "Registering new task definition..."
       - |
         TASK_DEF_ARN=$(aws ecs register-task-definition \
           --cli-input-json file://taskdef.json \
           --query 'taskDefinition.taskDefinitionArn' \
           --output text)
-        echo "New task definition ARN: $TASK_DEF_ARN"
+        - echo "New task definition ARN: $TASK_DEF_ARN"
+
+      - echo "Creating appspec.yml..."
       - |
         cat > appspec.yml <<EOF
         version: 0.0
@@ -60,9 +76,9 @@ phases:
                   ContainerName: "${CONTAINER_NAME}"
                   ContainerPort: 7890
         EOF
-      - echo "[{\"name\":\"${CONTAINER_NAME}\",\"imageUri\":\"${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}\"}]" > imagedefinitions.json
-      - cat imagedefinitions.json
-      - cat appspec.yml
+
+      - echo "Creating imagedefinitions.json..."
+      - echo "[{\"name\":\"${CONTAINER_NAME}\",\"imageUri\":\"${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}@${IMAGE_DIGEST}\"}]" > imagedefinitions.json
 
 artifacts:
   files:
