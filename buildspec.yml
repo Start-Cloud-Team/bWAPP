@@ -15,7 +15,6 @@ phases:
   post_build:
     commands:
       - echo "Pushing Docker image to ECR..."
-@@ -21,7 +23,7 @@
           "executionRoleArn": "arn:aws:iam::329984431650:role/ecsTaskExecutionRole",
           "containerDefinitions": [
             {
@@ -24,7 +23,6 @@ phases:
               "image": "${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}",
               "essential": true,
               "portMappings": [
-@@ -55,10 +57,10 @@
               Properties:
                 TaskDefinition: "${TASK_DEF_ARN}"
                 LoadBalancerInfo:
