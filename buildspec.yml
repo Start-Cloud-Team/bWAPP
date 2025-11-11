@@ -1,9 +1,5 @@
 version: 0.2
 
-env:
-  variables:
-    CONTAINER_NAME: Bwapp-container
-
 phases:
   pre_build:
     commands:
@@ -19,68 +15,24 @@ phases:
   post_build:
     commands:
       - echo "Pushing Docker image to ECR..."
-      - docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
-
-      - echo "Retrieving image digest..."
-      - IMAGE_DIGEST=$(aws ecr describe-images \
-          --repository-name ${IMAGE_REPO_NAME} \
-          --image-ids imageTag=${IMAGE_TAG} \
-          --query 'imageDetails[0].imageDigest' --output text)
-
-      - echo "Creating task definition..."
-      - |
-        cat > taskdef.json <<EOF
-        {
+@@ -21,7 +23,7 @@
           "executionRoleArn": "arn:aws:iam::329984431650:role/ecsTaskExecutionRole",
           "containerDefinitions": [
             {
+              "name": "Bwapp-container",
               "name": "${CONTAINER_NAME}",
-              "image": "${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}@${IMAGE_DIGEST}",
+              "image": "${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}",
               "essential": true,
               "portMappings": [
-                {
-                  "protocol": "tcp",
-                  "hostPort": 7890,
-                  "containerPort": 7890
-                }
-              ]
-            }
-          ],
-          "requiresCompatibilities": ["FARGATE"],
-          "networkMode": "awsvpc",
-          "cpu": "256",
-          "memory": "2048",
-          "family": "SCT-Bwapp-task-defition"
-        }
-        EOF
-
-      - echo "Registering new task definition..."
-      - |
-        TASK_DEF_ARN=$(aws ecs register-task-definition \
-          --cli-input-json file://taskdef.json \
-          --query 'taskDefinition.taskDefinitionArn' \
-          --output text)
-        - echo "New task definition ARN: $TASK_DEF_ARN"
-
-      - echo "Creating appspec.yml..."
-      - |
-        cat > appspec.yml <<EOF
-        version: 0.0
-        Resources:
-          - TargetService:
-              Type: AWS::ECS::Service
+@@ -55,10 +57,10 @@
               Properties:
                 TaskDefinition: "${TASK_DEF_ARN}"
                 LoadBalancerInfo:
+                  ContainerName: "Bwapp-container"
                   ContainerName: "${CONTAINER_NAME}"
                   ContainerPort: 7890
         EOF
-
-      - echo "Creating imagedefinitions.json..."
-      - echo "[{\"name\":\"${CONTAINER_NAME}\",\"imageUri\":\"${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}@${IMAGE_DIGEST}\"}]" > imagedefinitions.json
-
-artifacts:
-  files:
-    - imagedefinitions.json
-    - taskdef.json
-    - appspec.yml
+      - echo "[{\"name\":\"Bwapp-container\",\"imageUri\":\"${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}\"}]" > imagedefinitions.json
+      - echo "[{\"name\":\"${CONTAINER_NAME}\",\"imageUri\":\"${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}\"}]" > imagedefinitions.json
+      - cat imagedefinitions.json
+      - cat appspec.yml
