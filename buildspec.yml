@@ -25,13 +25,11 @@ phases:
         {
           "executionRoleArn": "arn:aws:iam::329984431650:role/ecsTaskExecutionRole",
           "containerDefinitions": [
-@@ -33,35 +33,36 @@
               ]
             }
           ],
           "requiresCompatibilities": ["FARGATE"],
           "networkMode": "awsvpc",
-          #컨테이너를 실행하기 위한 파라미터
           "requiresCompatibilities": ["FARGATE"],  
           "networkMode": "awsvpc",  
           "cpu": "256",
