@@ -1,9 +1,5 @@
 version: 0.2
 
-env:
-  variables:
-    IMAGE_TAG: "latest"  # 필요하면 CodeBuild 환경 변수로 변경 가능
-
 phases:
   pre_build:
     commands:
@@ -20,64 +16,11 @@ phases:
     commands:
       - echo "Pushing Docker image to ECR..."
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - echo "Build completed successfully."
-
-      # taskdef.json 생성
-      - |
-        cat > taskdef.json <<EOF
-        {
-          "executionRoleArn": "arn:aws:iam::329984431650:role/ecsTaskExecutionRole",
-          "containerDefinitions": [
-            {
-              "name": "Bwapp-container",
-              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
-              "essential": true,
-              "memory": 2048,
-              "cpu": 256,
-              "portMappings": [
-                {
-                  "containerPort": 7890,
-                  "protocol": "tcp"
-                }
-              ]
-            }
-          ],
-          "requiresCompatibilities": ["FARGATE"],
-          "networkMode": "awsvpc",
-          "cpu": "256",
-          "memory": "2048",
-          "family": "SCT-Bwapp-task-defition"
-        }
-        EOF
-
-      # ECS에 task 정의 등록
-      - |
-        TASK_DEF_ARN=$(aws ecs register-task-definition \
-          --cli-input-json file://taskdef.json \
-          --query 'taskDefinition.taskDefinitionArn' \
-          --output text)
-        echo "New task definition ARN: $TASK_DEF_ARN"
-
-      # appspec.yml 생성
-      - |
-        cat > appspec.yml <<EOF
-        version: 0.0
-        Resources:
-          - TargetService:
-              Type: AWS::ECS::Service
-              Properties:
-                TaskDefinition: "$TASK_DEF_ARN"
-                LoadBalancerInfo:
-                  ContainerName: "Bwapp-container"
-                  ContainerPort: 7890
-        EOF
-
-      # imagedefinitions.json 생성
+      - echo "Writing image definitions file..."
       - |
         echo '[{"name":"Bwapp-container","imageUri":"'$ACCOUNT_ID'.dkr.ecr.'$AWS_DEFAULT_REGION'.amazonaws.com/'$IMAGE_REPO_NAME':'$IMAGE_TAG'"}]' > imagedefinitions.json
+      - echo "Build completed successfully."
 
 artifacts:
   files:
     - imagedefinitions.json
-    - taskdef.json
-    - appspec.yml
