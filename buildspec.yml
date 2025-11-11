@@ -16,54 +16,17 @@ phases:
     commands:
       - echo "Pushing Docker image to ECR..."
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - echo "Writing image definitions file..."
+
+      # ✅ imagedefinitions.json 생성 (컨테이너 이름 정확히 맞춤)
+      - echo "Creating imagedefinitions.json..."
       - |
         echo '[{"name":"Bwapp-container","imageUri":"'$ACCOUNT_ID'.dkr.ecr.'$AWS_DEFAULT_REGION'.amazonaws.com/'$IMAGE_REPO_NAME':'$IMAGE_TAG'"}]' > imagedefinitions.json
 
-      - echo "Generating taskdef.json..."
-      - |
-        cat > taskdef.json <<EOF
-        {
-          "family": "SCT-Bwapp-task-defition",
-          "executionRoleArn": "arn:aws:iam::329984431650:role/ecsTaskExecutionRole",
-          "networkMode": "awsvpc",
-          "requiresCompatibilities": ["FARGATE"],
-          "cpu": "256",
-          "memory": "2048",
-          "containerDefinitions": [
-            {
-              "name": "Bwapp-container",
-              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
-              "essential": true,
-              "portMappings": [
-                {
-                  "containerPort": 7890,
-                  "protocol": "tcp"
-                }
-              ]
-            }
-          ]
-        }
-        EOF
-
-      - echo "Generating appspec.yml..."
-      - |
-        cat > appspec.yml <<EOF
-        version: 0.0
-        Resources:
-          - TargetService:
-              Type: AWS::ECS::Service
-              Properties:
-                TaskDefinition: "SCT-Bwapp-task-defition"
-                LoadBalancerInfo:
-                  ContainerName: "Bwapp-container"
-                  ContainerPort: 7890
-        EOF
+      # (선택) appspec.yml과 taskdef.json을 함께 생성하려면 아래 추가 가능
+      # - echo "Creating taskdef.json and appspec.yml..." ...
 
       - echo "Build completed successfully."
 
 artifacts:
   files:
     - imagedefinitions.json
-    - taskdef.json
-    - appspec.yml
