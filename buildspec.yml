@@ -76,4 +76,5 @@ artifacts:
     - imagedefinitions.json
     - taskdef.json
     - appspec.yml
+  base-directory : .
   name: BuildArtifact
