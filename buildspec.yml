@@ -26,7 +26,6 @@ phases:
           --repository-name ${IMAGE_REPO_NAME} \
           --image-ids imageTag=${IMAGE_TAG} \
           --query 'imageDetails[0].imageDigest' --output text)
-      - echo "Image digest: $IMAGE_DIGEST"
 
       - echo "Creating task definition..."
       - |
