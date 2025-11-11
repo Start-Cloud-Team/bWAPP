@@ -6,17 +6,17 @@ phases:
       - echo "Logging in to Amazon ECR..."
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
   build:
-    commands:
-      - echo "Building Docker image..."
-      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
-      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG
+  commands:
+    - echo "Building Docker image..."
+    - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+    - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
   post_build:
     commands:
       - echo "Pushing Docker image to ECR..."
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - echo "Build completed successfully."
       - |
-        cat > taskdef.json <<EOF
+        cat > taskdef.json <<EOF 
         {
           "executionRoleArn": "arn:aws:iam::329984431650:role/ecsTaskExecutionRole",
           "containerDefinitions": [
@@ -33,11 +33,12 @@ phases:
               ]
             }
           ],
-          "requiresCompatibilities": ["FARGATE"],
-          "networkMode": "awsvpc",
+          #컨테이너를 실행하기 위한 파라미터
+          "requiresCompatibilities": ["FARGATE"],  
+          "networkMode": "awsvpc",  
           "cpu": "256",
-          "memory": "2048",
-          "family": "SCT-Bwapp-task-defition"
+          "memory": "2048", 
+          "family": "SCT-Bwapp-task-defition" 
         }
         EOF
       - |
