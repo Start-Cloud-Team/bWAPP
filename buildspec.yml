@@ -18,7 +18,7 @@ phases:
 
   post_build:
     commands:
-      - echo "=== POST_BUILD: push image ==="
+      - echo "=== POST_BUILD push image ==="
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
       - echo "=== Create imagedefinitions.json ==="
