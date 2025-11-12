@@ -23,7 +23,7 @@ phases:
 
       - echo "=== Create imagedefinitions.json ==="
       - |
-        echo '[{"name":"Bwapp-container","imageUri":"329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/ljh_1/$IMAGE_REPO_NAME':'$IMAGE_TAG'"}]' > imagedefinitions.json
+        echo '[{"name":"Bwapp-container","imageUri":"'$ACCOUNT_ID'.dkr.ecr.'$AWS_DEFAULT_REGION'.amazonaws.com/'$IMAGE_REPO_NAME':'$IMAGE_TAG'"}]' > imagedefinitions.json
 
       - echo "=== Create taskdef.json ==="
       - |
