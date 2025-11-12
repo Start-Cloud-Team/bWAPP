@@ -58,7 +58,6 @@ phases:
                   ContainerPort: 7890
         EOF
       - echo "Build completed successfully."
-      ls -al
 
 artifacts:
   files:
