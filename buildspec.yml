@@ -64,7 +64,7 @@ phases:
                   ContainerPort: 7890
         EOF
 
-      - echo "=== DEBUG: list files ==="
+      - echo "=== DEBUG list files ==="
       - ls -la
       - cat taskdef.json
       - cat appspec.yml
