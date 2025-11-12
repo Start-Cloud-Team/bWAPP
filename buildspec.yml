@@ -30,7 +30,7 @@ phases:
       - |
         cat <<EOF > taskdef.json
         {
-          "family": "SCT-Bwapp-task-defition",
+          "family": "SCT-Bwapp-defition",
           "executionRoleArn": "arn:aws:iam::329984431650:role/ecsTaskExecutionRole",
           "networkMode": "awsvpc",
           "requiresCompatibilities": ["FARGATE"],
