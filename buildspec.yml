@@ -54,7 +54,7 @@ phases:
 
       - echo "=== Create appspec.api.yml ==="
       - |
-        cat <<EOF > appspec.yml
+        cat <<EOF > appspec.api.yml
         version: 0.0
         Resources:
           - TargetService:
