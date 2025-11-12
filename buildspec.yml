@@ -43,7 +43,7 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/ljh_1",
+              "image": "<IMAGE_PLACEHOLDER>",
               "essential": true,
               "portMappings": [
                 {
