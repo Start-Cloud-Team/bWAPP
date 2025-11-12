@@ -42,7 +42,7 @@ phases:
           "memory": "2048",
           "containerDefinitions": [
             {
-              "name": "Bwapp-SCT-container",
+              "name": "Bwapp-container",
               "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
               "essential": true,
               "portMappings": [
