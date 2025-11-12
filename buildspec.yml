@@ -22,7 +22,7 @@ phases:
         cat <<EOF > imageDetail.json
         {
           "name": "Bwapp-container",
-          "image": "329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/ljh_1:'$IMAGE_TAG'"
+          "image": "329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/ljh_1:$IMAGE_TAG"
         }
         EOF
 
@@ -39,7 +39,7 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "<IMAGE_PLACEHOLDER>",
+              "image": "329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/ljh_1:$IMAGE_TAG",
               "essential": true,
               "portMappings": [
                 {
