@@ -62,9 +62,9 @@ phases:
         }
         EOF
 
-      - echo "=== CREATE appspec.yml ==="
+      - echo "=== CREATE appspec.yaml ==="
       - |
-        cat <<EOF > appspec.yml
+        cat <<EOF > appspec.yaml
         version: 0.0
         Resources:
           - TargetService:
@@ -80,4 +80,4 @@ artifacts:
   files:
     - imageDetail.json
     - taskdef.json
-    - appspec.yml
+    - appspec.yaml
