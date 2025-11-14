@@ -30,6 +30,7 @@ phases:
         cat <<EOF > imageDetail.json
         [
           {
+            "name": "Bwapp-container"
             "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
           }
         ]
