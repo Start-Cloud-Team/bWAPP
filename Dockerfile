@@ -12,7 +12,9 @@ COPY . /var/www/html/
 
 # 웹 서버 실행 사용자(www-data)에게 디렉토리 권한 부여
 RUN chown -R www-data:www-data /var/www/html/ && \
-    chmod -R 755 /var/www/html/
+    chmod -R 755 /var/www/html/ && \
+    # db 디렉터리에만 그룹 쓰기 권한(775)을 추가로 부여 
+    chmod -R 775 /var/www/html/db
 
 # **Step 2: 노출 포트를 8080으로 변경**
 # 컨테이너가 8080 포트를 노출하도록 명시
