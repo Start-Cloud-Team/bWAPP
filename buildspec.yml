@@ -22,7 +22,7 @@ phases:
         cat <<EOF > imageDetail.json
         {
           "name": "Bwapp-container",
-          "image": "329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/ljh_1:$IMAGE_TAG"
+          "image": "329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/bwapp-image-repo:$IMAGE_TAG"
         }
         EOF
 
