@@ -8,4 +8,4 @@ RUN chown -R www-data:www-data /var/www/html/ && \
     chmod -R 755 /var/www/html/
 
 # 웹 서버 기본 포트인 80번 포트를 노출합니다.
-EXPOSE 80
+EXPOSE 8080
