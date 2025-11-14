@@ -49,8 +49,8 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
-              "essential": true,
+              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
+              "essential": true,
               "portMappings": [
                 {
                   "containerPort": 8080,
