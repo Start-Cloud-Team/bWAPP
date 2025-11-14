@@ -24,9 +24,10 @@ phases:
       - echo "=== PUSH IMAGE ==="
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
-      - echo "=== CREATE imageDetail.json (CodeDeploy B/G) ==="
+      # 1. CodeDeploy 표준 파일명 (imagedefinitions.json) 사용
+      - echo "=== CREATE imagedefinitions.json ==="
       - |
-        cat <<EOF > imageDetail.json
+        cat <<EOF > imagedefinitions.json
         [
           {
             "name": "Bwapp-container",
@@ -35,11 +36,12 @@ phases:
         ]
         EOF
       
-      # 🚨 새로 추가된 디버깅 명령
-      - echo "--- imageDetail.json Contents for Debugging ---"
-      - cat imageDetail.json
-      - echo "-----------------------------------------------"
+      # 디버깅 출력 (로그에서 생성된 JSON 내용 확인용)
+      - echo "--- imagedefinitions.json Contents ---"
+      - cat imagedefinitions.json
+      - echo "--------------------------------------"
       
+      # 2. Task Definition에 플레이스홀더(<IMAGE_URI>) 사용
       - echo "=== CREATE taskdef.json (with Placeholder) ==="
       - |
         cat <<EOF > taskdef.json
@@ -53,7 +55,7 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "<IMAGE_URI>",
+              "image": "<IMAGE_URI>",  # <-- CodeDeploy가 대체할 플레이스홀더
               "essential": true,
               "portMappings": [
                 {
@@ -82,6 +84,6 @@ phases:
 
 artifacts:
   files:
-    - imageDetail.json
+    - imagedefinitions.json # <-- 아티팩트 목록 업데이트
     - taskdef.json
     - appspec.yaml
