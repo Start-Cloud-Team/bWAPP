@@ -1,10 +1,9 @@
-# buildspec.yml
 version: 0.2
 
 env:
   variables:
     IMAGE_REPO_NAME: "bwapp-image-repo"
-    IMAGE_TAG: "latest"  # 실제 태그로 변경 가능
+    IMAGE_TAG: "latest"
     ACCOUNT_ID: "329984431650"
     AWS_DEFAULT_REGION: "ap-northeast-2"
 
@@ -16,7 +15,7 @@ phases:
 
   build:
     commands:
-      - echo "=== BUILD ==="
+      - echo "=== BUILD ==UGH"
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
@@ -25,16 +24,16 @@ phases:
       - echo "=== PUSH IMAGE ==="
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
-      - echo "=== CREATE imageDetail.json ===" 
-      - |
-        cat <<EOF > imageDetail.json 
-        [
-          {
-            "name": "Bwapp-container",
-            "imageUri": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
-          }
-        ]
-        EOF
+      - echo "=== CREATE imageDetail.json ==="
+      - |
+        cat <<EOF > imageDetail.json
+        [
+          {
+            "name": "Bwapp-container",
+            "imageUri": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
+          }
+        ]
+        EOF
 
       - echo "=== CREATE taskdef.json ==="
       - |
@@ -49,8 +48,8 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
-              "essential": true,
+              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
+              "essential": true,
               "portMappings": [
                 {
                   "containerPort": 8080,
@@ -70,7 +69,7 @@ phases:
           - TargetService:
               Type: AWS::ECS::Service
               Properties:
-                TaskDefinition: "Bwapp-tasks"  # 최신 Revision 자동 사용
+                TaskDefinition: "Bwapp-tasks"
                 LoadBalancerInfo:
                   ContainerName: "Bwapp-container"
                   ContainerPort: 8080
