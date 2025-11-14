@@ -43,7 +43,7 @@ phases:
               "essential": true,
               "portMappings": [
                 {
-                  "containerPort": 7890,
+                  "containerPort": 8080,
                   "protocol": "tcp"
                 }
               ]
@@ -63,7 +63,7 @@ phases:
                 TaskDefinition: "SCT-Bwapp-task-defition"
                 LoadBalancerInfo:
                   ContainerName: "Bwapp-container"
-                  ContainerPort: 7890
+                  ContainerPort: 8080
         EOF
 
 artifacts:
