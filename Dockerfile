@@ -1,11 +1,15 @@
 FROM php:5.6-apache
 
-# CodeBuild 환경에서 소스 코드를 웹 루트 디렉토리로 복사합니다.
+# 아파치의 기본 리스닝 포트를 8080으로 변경
+RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf \
+    && sed -i 's/:80/:8080/g' /etc/apache2/sites-enabled/000-default.conf
+
+# 소스를 복사
 COPY . /var/www/html/
 
-# 웹 서버 실행 사용자(www-data)에게 디렉토리 권한을 부여합니다.
+# 권한 설정
 RUN chown -R www-data:www-data /var/www/html/ && \
     chmod -R 755 /var/www/html/
 
-# 웹 서버 기본 포트인 80번 포트를 노출합니다.
+# 8080 포트를 노출
 EXPOSE 8080
