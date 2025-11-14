@@ -15,7 +15,7 @@ phases:
 
   build:
     commands:
-      - echo "=== BUILD ==UGH"
+      - echo "=== BUILD ==="
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
@@ -24,7 +24,7 @@ phases:
       - echo "=== PUSH IMAGE ==="
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
-      - echo "=== CREATE imageDetail.json ==="
+      - echo "=== CREATE imageDetail.json (CodeDeploy B/G) ==="
       - |
         cat <<EOF > imageDetail.json
         [
@@ -35,7 +35,7 @@ phases:
         ]
         EOF
 
-      - echo "=== CREATE taskdef.json ==="
+      - echo "=== CREATE taskdef.json (with Placeholder) ==="
       - |
         cat <<EOF > taskdef.json
         {
@@ -48,7 +48,7 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
+              "image": "<IMAGE_URI>",  # <--- 이 부분이 플레이스홀더로 변경되었습니다.
               "essential": true,
               "portMappings": [
                 {
