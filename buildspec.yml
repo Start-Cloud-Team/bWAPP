@@ -34,7 +34,12 @@ phases:
           }
         ]
         EOF
-
+      
+      # 🚨 새로 추가된 디버깅 명령
+      - echo "--- imageDetail.json Contents for Debugging ---"
+      - cat imageDetail.json
+      - echo "-----------------------------------------------"
+      
       - echo "=== CREATE taskdef.json (with Placeholder) ==="
       - |
         cat <<EOF > taskdef.json
