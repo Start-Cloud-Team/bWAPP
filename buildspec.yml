@@ -28,7 +28,7 @@ phases:
 
       - echo "=== Create taskdef.json ==="
       - |
-        cat <<EOF > taskdef.api.json
+        cat <<EOF > taskdef.json
         {
           "family": "SCT-Bwapp-defition",
           "executionRoleArn": "arn:aws:iam::329984431650:role/ecsTaskExecutionRole",
@@ -52,9 +52,9 @@ phases:
         }
         EOF
 
-      - echo "=== Create appspec.api.yml ==="
+      - echo "=== Create appspec.yml ==="
       - |
-        cat <<EOF > appspec.api.yml
+        cat <<EOF > appspec.yml
         version: 0.0
         Resources:
           - TargetService:
@@ -69,5 +69,5 @@ phases:
 artifacts:
   files:
     - imageDetail.json
-    - taskdef.api.json
-    - appspec.api.yml
+    - taskdef.json
+    - appspec.yml
