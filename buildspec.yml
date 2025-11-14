@@ -25,17 +25,6 @@ phases:
       - echo "=== PUSH IMAGE ==="
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
-      - echo "=== CREATE imagedefinitions.json ==="
-      - |
-        cat <<EOF > imagedefinitions.json
-        [
-          {
-            "name": "Bwapp-container",
-            "image": $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-          }
-        ]
-        EOF
-
       - echo "=== CREATE taskdef.json ==="
       - |
         cat <<EOF > taskdef.json
@@ -74,6 +63,18 @@ phases:
                 LoadBalancerInfo:
                   ContainerName: "Bwapp-container"
                   ContainerPort: 8080
+        EOF
+
+
+      - echo "=== CREATE imagedefinitions.json ==="
+      - |
+        cat <<EOF > imagedefinitions.json
+        [
+          {
+            "name": "Bwapp-container",
+            "image": $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+          }
+        ]
         EOF
 
 artifacts:
