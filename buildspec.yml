@@ -30,7 +30,7 @@ phases:
       - |
         cat <<EOF > taskdef.json
         {
-          "family": "SCT-Bwapp-defition",
+          "family": "Bwapp-tasks",
           "executionRoleArn": "arn:aws:iam::329984431650:role/ecsTaskExecutionRole",
           "networkMode": "awsvpc",
           "requiresCompatibilities": ["FARGATE"],
@@ -39,7 +39,7 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/ljh_1:$IMAGE_TAG",
+              "image": "329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/bwapp-image-repo:$IMAGE_TAG",
               "essential": true,
               "portMappings": [
                 {
@@ -60,7 +60,7 @@ phases:
           - TargetService:
               Type: AWS::ECS::Service
               Properties:
-                TaskDefinition: "SCT-Bwapp-task-defition"
+                TaskDefinition: "Bwapp-tasks"
                 LoadBalancerInfo:
                   ContainerName: "Bwapp-container"
                   ContainerPort: 8080
