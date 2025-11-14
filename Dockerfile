@@ -1,15 +1,15 @@
+# 베이스 이미지
 FROM php:5.6-apache
 
-# 아파치의 기본 리스닝 포트를 8080으로 변경
-RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf \
-    && sed -i 's/:80/:8080/g' /etc/apache2/sites-enabled/000-default.conf
-
-# 소스를 복사
+# 웹 루트 디렉토리로 코드 복사
 COPY . /var/www/html/
 
-# 권한 설정
+# 웹 서버 실행 사용자(www-data)에게 디렉토리 권한 부여
 RUN chown -R www-data:www-data /var/www/html/ && \
     chmod -R 755 /var/www/html/
 
-# 8080 포트를 노출
-EXPOSE 8080
+# Apache 기본 포트 80 노출
+EXPOSE 80
+
+# 컨테이너 시작 시 Apache 실행
+CMD ["apache2-foreground"]
