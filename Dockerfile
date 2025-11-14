@@ -1,6 +1,10 @@
 # 베이스 이미지
 FROM php:5.6-apache
 
+# --- Step0. 누락된 PHP 확장 설치 ---
+# bWAPP가 MySQL DB에 연결하기 위해 mysqli 확장이 필요합니다.
+RUN docker-php-ext-install mysqli
+
 # **Step 1: Apache가 8080 포트를 리스닝하도록 설정**
 # 이 명령어는 Apache 설정 파일(ports.conf)의 80번 포트 리스닝 부분을 8080으로 변경합니다.
 RUN sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf && \
