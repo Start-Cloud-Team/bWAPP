@@ -1,4 +1,12 @@
-version: 0.1
+# buildspec.yml
+version: 0.2
+
+env:
+  variables:
+    IMAGE_REPO_NAME: "bwapp-image-repo"
+    IMAGE_TAG: "latest"  # 실제 태그로 변경 가능
+    ACCOUNT_ID: "329984431650"
+    AWS_DEFAULT_REGION: "ap-northeast-2"
 
 phases:
   pre_build:
@@ -14,24 +22,26 @@ phases:
 
   post_build:
     commands:
-      - echo "=== POST_BUILD push image ==="
+      - echo "=== PUSH IMAGE ==="
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
-      - echo "=== Create imagedefinitions.json ==="
+      - echo "=== CREATE imageDetail.json ==="
       - |
         cat <<EOF > imageDetail.json
-        {
-          "name": "Bwapp-container",
-          "image": "329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/bwapp-image-repo:$IMAGE_TAG"
-        }
+        [
+          {
+            "name": "Bwapp-container",
+            "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
+          }
+        ]
         EOF
 
-      - echo "=== Create taskdef.json ==="
+      - echo "=== CREATE taskdef.json ==="
       - |
         cat <<EOF > taskdef.json
         {
           "family": "Bwapp-tasks",
-          "executionRoleArn": "arn:aws:iam::329984431650:role/ecsTaskExecutionRole",
+          "executionRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/ecsTaskExecutionRole",
           "networkMode": "awsvpc",
           "requiresCompatibilities": ["FARGATE"],
           "cpu": "256",
@@ -39,7 +49,7 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "329984431650.dkr.ecr.ap-northeast-2.amazonaws.com/bwapp-image-repo:$IMAGE_TAG",
+              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
               "essential": true,
               "portMappings": [
                 {
@@ -52,7 +62,7 @@ phases:
         }
         EOF
 
-      - echo "=== Create appspec.yml ==="
+      - echo "=== CREATE appspec.yml ==="
       - |
         cat <<EOF > appspec.yml
         version: 0.0
@@ -60,7 +70,7 @@ phases:
           - TargetService:
               Type: AWS::ECS::Service
               Properties:
-                TaskDefinition: "Bwapp-tasks"
+                TaskDefinition: "Bwapp-tasks"  # 최신 Revision 자동 사용
                 LoadBalancerInfo:
                   ContainerName: "Bwapp-container"
                   ContainerPort: 8080
