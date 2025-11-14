@@ -1,3 +1,4 @@
+# buildspec.yml
 version: 0.2
 
 env:
@@ -6,15 +7,11 @@ env:
     IMAGE_TAG: "latest"  # 실제 태그로 변경 가능
     ACCOUNT_ID: "329984431650"
     AWS_DEFAULT_REGION: "ap-northeast-2"
-    ECS_CLUSTER_NAME: "Bwapp-deploy-ECS-cluster"
-    ECS_SERVICE_NAME: "Bwapp-service"
-    TASK_FAMILY: "Bwapp-tasks"
 
 phases:
   pre_build:
     commands:
       - echo "=== PRE_BUILD ==="
-      - echo "IMAGE_TAG=$IMAGE_TAG"
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
 
   build:
@@ -28,11 +25,22 @@ phases:
       - echo "=== PUSH IMAGE ==="
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
+      - echo "=== CREATE imageDetail.json ==="
+      - |
+        cat <<EOF > imageDetail.json
+        [
+          {
+            "name": "Bwapp-container",
+            "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
+          }
+        ]
+        EOF
+
       - echo "=== CREATE taskdef.json ==="
       - |
         cat <<EOF > taskdef.json
         {
-          "family": "$TASK_FAMILY",
+          "family": "Bwapp-tasks",
           "executionRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/ecsTaskExecutionRole",
           "networkMode": "awsvpc",
           "requiresCompatibilities": ["FARGATE"],
@@ -54,21 +62,6 @@ phases:
         }
         EOF
 
-      - echo "=== REGISTER NEW TASK DEFINITION ==="
-      - TASK_REVISION_ARN=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query 'taskDefinition.taskDefinitionArn' --output text)
-      - echo "New Task Definition ARN $TASK_REVISION_ARN"
-
-      - echo "=== CREATE imageDetail.json ==="
-      - |
-        cat <<EOF > imageDetail.json
-        [
-          {
-            "name": "Bwapp-container",
-            "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
-          }
-        ]
-        EOF
-
       - echo "=== CREATE appspec.yml ==="
       - |
         cat <<EOF > appspec.yml
@@ -77,7 +70,7 @@ phases:
           - TargetService:
               Type: AWS::ECS::Service
               Properties:
-                TaskDefinition: "$TASK_REVISION_ARN"
+                TaskDefinition: "Bwapp-tasks"  # 최신 Revision 자동 사용
                 LoadBalancerInfo:
                   ContainerName: "Bwapp-container"
                   ContainerPort: 8080
