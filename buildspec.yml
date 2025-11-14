@@ -48,7 +48,7 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "<IMAGE_URI>",  # <--- 이 부분이 플레이스홀더로 변경되었습니다.
+              "image": "<IMAGE_URI>",
               "essential": true,
               "portMappings": [
                 {
