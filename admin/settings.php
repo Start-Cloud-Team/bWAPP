@@ -17,10 +17,10 @@ bWAPP is licensed under a Creative Commons Attribution-NonCommercial-NoDerivativ
 */
 
 // Database connection settings
-$db_server = "localhost";
+$db_server = "mysql-db";
 $db_username = "root";
-$db_password = "";
-$db_name = "bWAPP";
+$db_password = "BwappSCT";
+$db_name = "bwapp";
 
 // SQLite database name
 $db_sqlite = "db/bwapp.sqlite";
@@ -54,5 +54,6 @@ $evil_bee = 0;
 // These credentials are used on some PHP pages
 $login = "bee";
 $password = "bug";
+
 
 ?>
