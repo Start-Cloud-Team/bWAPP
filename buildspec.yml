@@ -6,6 +6,7 @@ env:
     IMAGE_TAG: "latest"
     ACCOUNT_ID: "329984431650"
     AWS_DEFAULT_REGION: "ap-northeast-2"
+    TASK_DEFINITION_ARN: "arn:aws:ecs:ap-northeast-2:329984431650:task-definition/Bwapp-tasks:7"
 
 phases:
   pre_build:
@@ -72,18 +73,16 @@ phases:
       - echo Creating appspec.yaml...
       - |
         cat <<EOF > appspec.yaml
-        {
-          version: 0.0
-          Resources:
-            - TargetService:
-                Type: AWS::ECS::Service
-                Properties:
-                  TaskDefinition: taskdef.json
-                  LoadBalancerInfo:
-                    ContainerName: Bwapp-container
-                    ContainerPort: 8080
-          }
-          EOF
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "$TASK_DEFINITION_ARN"
+        LoadBalancerInfo:
+          ContainerName: Bwapp-container
+          ContainerPort: 8080
+EOF
 
 artifacts:
   files:
