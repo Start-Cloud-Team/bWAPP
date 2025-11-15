@@ -72,16 +72,18 @@ phases:
       - echo Creating appspec.yaml...
       - |
         cat <<EOF > appspec.yaml
-version: 0.0
-Resources:
-  - TargetService:
-      Type: AWS::ECS::Service
-      Properties:
-        TaskDefinition: taskdef.json
-        LoadBalancerInfo:
-          ContainerName: Bwapp-container
-          ContainerPort: 8080
-EOF
+        {
+          version: 0.0
+          Resources:
+            - TargetService:
+                Type: AWS::ECS::Service
+                Properties:
+                  TaskDefinition: taskdef.json
+                  LoadBalancerInfo:
+                    ContainerName: Bwapp-container
+                    ContainerPort: 8080
+          }
+          EOF
 
 artifacts:
   files:
