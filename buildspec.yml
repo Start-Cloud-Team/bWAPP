@@ -34,12 +34,7 @@ phases:
           }
         ]
         EOF
-      
-      # 🚨 새로 추가된 디버깅 명령
-      - echo "--- imageDetail.json Contents for Debugging ---"
-      - cat imageDetail.json
-      - echo "-----------------------------------------------"
-      
+
       - echo "=== CREATE taskdef.json (with Placeholder) ==="
       - |
         cat <<EOF > taskdef.json
@@ -53,7 +48,7 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "<IMAGE_URI>",
+              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
               "essential": true,
               "portMappings": [
                 {
@@ -74,7 +69,7 @@ phases:
           - TargetService:
               Type: AWS::ECS::Service
               Properties:
-                TaskDefinition: "Bwapp-tasks"
+                TaskDefinition: "arn:aws:ecs:ap-northeast-2:329984431650:task-definition/Bwapp-tasks:7"
                 LoadBalancerInfo:
                   ContainerName: "Bwapp-container"
                   ContainerPort: 8080
