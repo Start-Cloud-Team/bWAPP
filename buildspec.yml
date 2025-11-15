@@ -6,28 +6,27 @@ env:
     IMAGE_TAG: "latest"
     ACCOUNT_ID: "329984431650"
     AWS_DEFAULT_REGION: "ap-northeast-2"
-    TASK_DEFINITION_ARN: "arn:aws:ecs:ap-northeast-2:329984431650:task-definition/Bwapp-tasks:7"
 
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
+      - echo "=== PRE_BUILD ==="
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
 
   build:
     commands:
-      - echo Building Docker image...
+      - echo "=== BUILD ==="
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
   post_build:
     commands:
-      - echo Pushing Docker image...
+      - echo "=== PUSH IMAGE ==="
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
-      - echo Creating imagedefinitions.json...
+      - echo "=== CREATE imageDetail.json (CodeDeploy B/G) ==="
       - |
-        cat <<EOF > imagedefinitions.json
+        cat <<EOF > imageDetail.json
         [
           {
             "name": "Bwapp-container",
@@ -35,8 +34,13 @@ phases:
           }
         ]
         EOF
-
-      - echo Creating taskdef.json...
+      
+      # 🚨 새로 추가된 디버깅 명령
+      - echo "--- imageDetail.json Contents for Debugging ---"
+      - cat imageDetail.json
+      - echo "-----------------------------------------------"
+      
+      - echo "=== CREATE taskdef.json (with Placeholder) ==="
       - |
         cat <<EOF > taskdef.json
         {
@@ -49,51 +53,35 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
+              "image": "<IMAGE_URI>",
               "essential": true,
               "portMappings": [
                 {
                   "containerPort": 8080,
                   "protocol": "tcp"
                 }
-              ],
-              "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                  "awslogs-group": "/ecs/bWAPP-ECS-task",
-                  "awslogs-region": "$AWS_DEFAULT_REGION",
-                  "awslogs-stream-prefix": "ecs"
-                }
-              }
+              ]
             }
           ]
         }
         EOF
 
-      - echo Creating appspec.yaml...
+      - echo "=== CREATE appspec.yaml ==="
       - |
         cat <<EOF > appspec.yaml
-        {
-          version: 0.0
-          Resources:
-            - TargetService:
-            [
-                Type: AWS::ECS::Service
-                Properties:
-                {
-                  TaskDefinition: "$TASK_DEFINITION_ARN"
-                  LoadBalancerInfo:
-                  [
-                    ContainerName: Bwapp-container
-                    ContainerPort: 8080
-                  ]
-                }
-            ]
-        }
-          EOF
+        version: 0.0
+        Resources:
+          - TargetService:
+              Type: AWS::ECS::Service
+              Properties:
+                TaskDefinition: "Bwapp-tasks"
+                LoadBalancerInfo:
+                  ContainerName: "Bwapp-container"
+                  ContainerPort: 8080
+        EOF
 
 artifacts:
   files:
-    - imagedefinitions.json
+    - imageDetail.json
     - taskdef.json
     - appspec.yaml
