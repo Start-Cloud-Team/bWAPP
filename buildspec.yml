@@ -34,9 +34,8 @@ phases:
           }
         ]
         EOF
-      - cat imagedefinitions.json
 
-      - echo Creating taskdef.json (new TaskDefinition will be registered by CodePipeline deploy step)...
+      - echo Creating taskdef.json...
       - |
         cat <<EOF > taskdef.json
         {
@@ -69,9 +68,8 @@ phases:
           ]
         }
         EOF
-      - cat taskdef.json
 
-      - echo Creating appspec.yaml with TASK_DEFINITION placeholder...
+      - echo Creating appspec.yaml...
       - |
         cat <<EOF > appspec.yaml
         version: 0.0
@@ -84,7 +82,6 @@ phases:
                   ContainerName: "Bwapp-container"
                   ContainerPort: 8080
         EOF
-      - cat appspec.yaml
 
 artifacts:
   files:
