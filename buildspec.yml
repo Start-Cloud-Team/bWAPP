@@ -27,60 +27,60 @@ phases:
       - echo "=== CREATE imageDetail.json (CodeDeploy B/G) ==="
       - |
         cat <<EOF > imageDetail.json
-[
-  {
-    "name": "Bwapp-container",
-    "imageUri": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
-  }
-]
-EOF
+        [
+          {
+            "name": "Bwapp-container",
+            "imageUri": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
+          }
+        ]
+        EOF
 
       - echo "=== CREATE taskdef.json ==="
       - |
         cat <<EOF > taskdef.json
-{
-  "family": "Bwapp-tasks",
-  "executionRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/ecsTaskExecutionRole",
-  "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
-  "memory": "2048",
-  "containerDefinitions": [
-    {
-      "name": "Bwapp-container",
-      "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
-      "essential": true,
-      "portMappings": [
         {
-          "containerPort": 8080,
-          "protocol": "tcp"
+          "family": "Bwapp-tasks",
+          "executionRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/ecsTaskExecutionRole",
+          "networkMode": "awsvpc",
+          "requiresCompatibilities": ["FARGATE"],
+          "cpu": "256",
+          "memory": "2048",
+          "containerDefinitions": [
+            {
+              "name": "Bwapp-container",
+              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
+              "essential": true,
+              "portMappings": [
+                {
+                  "containerPort": 8080,
+                  "protocol": "tcp"
+                }
+              ]
+            }
+          ]
         }
-      ]
-    }
-  ]
-}
-EOF
+        EOF
 
       - echo "=== CREATE appspec.yml ==="
       - |
         cat <<EOF > appspec.yml
-version: 0.0
-Resources:
-  - TargetService:
-      Type: AWS::ECS::Service
-      Properties:
-        TaskDefinition: "Bwapp-tasks"
-        LoadBalancerInfo:
-          ContainerName: "Bwapp-container"
-          ContainerPort: 8080
-          TargetGroupPairInfo:
-            TargetGroups:
-              - Name: "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:targetgroup/Bwapp-Blue-tg/83e84ce255542f3a"
-              - Name: "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:targetgroup/Bwapp-green-tg/7cb7245de5e86d29"
-            ProdTrafficRoute:
-              ListenerArns:
-                - "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:listener/app/Bwapp-ALB/2d620aae5e376586/d683d48d42724d6f"
-EOF
+        version: 0.0
+        Resources:
+          - TargetService:
+              Type: AWS::ECS::Service
+              Properties:
+                TaskDefinition: "Bwapp-tasks"
+                LoadBalancerInfo:
+                  ContainerName: "Bwapp-container"
+                  ContainerPort: 8080
+                  TargetGroupPairInfo:
+                    TargetGroups:
+                      - Name: "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:targetgroup/Bwapp-Blue-tg/83e84ce255542f3a"
+                      - Name: "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:targetgroup/Bwapp-green-tg/7cb7245de5e86d29"
+                    ProdTrafficRoute:
+                      ListenerArns:
+                        - "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:listener/app/Bwapp-ALB/2d620aae5e376586/d683d48d42724d6f"
+        EOF
 
 artifacts:
   files:
