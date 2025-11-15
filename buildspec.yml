@@ -10,22 +10,16 @@ env:
 phases:
   pre_build:
     commands:
-      - echo "=== PRE_BUILD ==="
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
 
   build:
     commands:
-      - echo "=== BUILD ==="
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
   post_build:
     commands:
-      - echo "=== PUSH IMAGE ==="
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-
-      # 1. CodeDeploy 표준 파일명 (imagedefinitions.json) 사용
-      - echo "=== CREATE imagedefinitions.json ==="
       - |
         cat <<EOF > imagedefinitions.json
         [
@@ -35,14 +29,7 @@ phases:
           }
         ]
         EOF
-      
-      # 디버깅 출력 (로그에서 생성된 JSON 내용 확인용)
-      - echo "--- imagedefinitions.json Contents ---"
       - cat imagedefinitions.json
-      - echo "--------------------------------------"
-      
-      # 2. Task Definition에 플레이스홀더(<IMAGE_URI>) 사용
-      - echo "=== CREATE taskdef.json (with Placeholder) ==="
       - |
         cat <<EOF > taskdef.json
         {
@@ -55,7 +42,7 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "<IMAGE_URI>",  # <-- CodeDeploy가 대체할 플레이스홀더
+              "image": "<IMAGE_URI>",
               "essential": true,
               "portMappings": [
                 {
@@ -67,8 +54,6 @@ phases:
           ]
         }
         EOF
-
-      - echo "=== CREATE appspec.yaml ==="
       - |
         cat <<EOF > appspec.yaml
         version: 0.0
@@ -84,6 +69,6 @@ phases:
 
 artifacts:
   files:
-    - imagedefinitions.json # <-- 아티팩트 목록 업데이트
+    - imagedefinitions.json
     - taskdef.json
     - appspec.yaml
