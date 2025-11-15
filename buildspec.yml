@@ -42,7 +42,7 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "<IMAGE_URI>",
+              "image": "Bwapp-container",  # <-- <IMAGE_URI> 대신 컨테이너 이름 (imagedefinitions.json의 name과 일치)
               "essential": true,
               "portMappings": [
                 {
