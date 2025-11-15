@@ -10,16 +10,21 @@ env:
 phases:
   pre_build:
     commands:
+      - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
 
   build:
     commands:
+      - echo Building the Docker image...
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
   post_build:
     commands:
+      - echo Pushing the Docker image...
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+
+      - echo Creating imagedefinitions.json...
       - |
         cat <<EOF > imagedefinitions.json
         [
@@ -30,6 +35,8 @@ phases:
         ]
         EOF
       - cat imagedefinitions.json
+
+      - echo Creating taskdef.json (new TaskDefinition will be registered by CodePipeline deploy step)...
       - |
         cat <<EOF > taskdef.json
         {
@@ -42,18 +49,29 @@ phases:
           "containerDefinitions": [
             {
               "name": "Bwapp-container",
-              "image": "Bwapp-container",  # <-- <IMAGE_URI> 대신 컨테이너 이름 (imagedefinitions.json의 name과 일치)
+              "image": "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG",
               "essential": true,
               "portMappings": [
                 {
                   "containerPort": 8080,
                   "protocol": "tcp"
                 }
-              ]
+              ],
+              "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                  "awslogs-group": "/ecs/bWAPP-ECS-task",
+                  "awslogs-region": "$AWS_DEFAULT_REGION",
+                  "awslogs-stream-prefix": "ecs"
+                }
+              }
             }
           ]
         }
         EOF
+      - cat taskdef.json
+
+      - echo Creating appspec.yaml with TASK_DEFINITION placeholder...
       - |
         cat <<EOF > appspec.yaml
         version: 0.0
@@ -61,11 +79,12 @@ phases:
           - TargetService:
               Type: AWS::ECS::Service
               Properties:
-                TaskDefinition: "Bwapp-tasks"
+                TaskDefinition: "TASK_DEFINITION"
                 LoadBalancerInfo:
                   ContainerName: "Bwapp-container"
                   ContainerPort: 8080
         EOF
+      - cat appspec.yaml
 
 artifacts:
   files:
