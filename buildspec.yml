@@ -62,8 +62,8 @@ phases:
         EOF
 
       - echo "=== CREATE appspec.yml ==="
-      - |
-        cat <<EOF > appspec.yml
+      - |
+        cat <<EOF > appspec.yml
         version: 0.0
         Resources:
           - TargetService:
@@ -73,6 +73,13 @@ phases:
                 LoadBalancerInfo:
                   ContainerName: "Bwapp-container"
                   ContainerPort: 8080
+                  TargetGroupPairInfo:
+                    TargetGroups:
+                      - Name: "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:targetgroup/Bwapp-Blue-tg/83e84ce255542f3a"  # <-- 실제 TG ARN으로 변경
+                      - Name: "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:targetgroup/Bwapp-green-tg/7cb7245de5e86d29"  # <-- 실제 TG ARN으로 변경
+                    ProdTrafficRoute:
+                      ListenerArns:
+                        - "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:listener/app/Bwapp-ALB/2d620aae5e376586/d683d48d42724d6f" # <-- 실제 Listener ARN으로 변경
         EOF
 
 artifacts:
