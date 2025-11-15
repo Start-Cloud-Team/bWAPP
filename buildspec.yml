@@ -66,20 +66,14 @@ phases:
         cat <<EOF > appspec.yml
         version: 0.0
         Resources:
-        - TargetService:
-            Type: AWS::ECS::Service
-            Properties:
-              TaskDefinition: "Bwapp-tasks"
-              LoadBalancerInfo:
-                ContainerName: "Bwapp-container"
-                ContainerPort: 8080
-                TargetGroupPairInfo:
-                  TargetGroups:
-                    - Name: "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:targetgroup/Bwapp-Blue-tg/83e84ce255542f3a"
-                    - Name: "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:targetgroup/Bwapp-green-tg/7cb7245de5e86d29"
-                  ProdTrafficRoute:
-                    ListenerArns:
-                      - "arn:aws:elasticloadbalancing:ap-northeast-2:329984431650:listener/app/Bwapp-ALB/2d620aae5e376586/d683d48d42724d6f"
+          - TargetService:
+              Type: AWS::ECS::Service
+              Properties:
+                TaskDefinition: "Bwapp-tasks"
+                LoadBalancerInfo:
+                  ContainerName: "Bwapp-container"
+                  ContainerPort: 8080
+
         EOF
 
 artifacts:
